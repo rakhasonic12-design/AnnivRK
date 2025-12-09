@@ -1,0 +1,68 @@
+body {
+  margin: 0;
+  font-family: "Comic Sans MS", cursive;
+  background: #ffe6ee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+}
+
+.game {
+  background: white;
+  width: 90%;
+  max-width: 360px;
+  border-radius: 20px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.game h2 {
+  color: #ff4d6d;
+  margin-bottom: 10px;
+}
+
+#gameArea {
+  background: #fff0f5;
+  height: 250px;
+  border-radius: 15px;
+  position: relative;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+#score {
+  font-size: 15px;
+  margin-bottom: 10px;
+  color: #ff4d6d;
+}
+
+#timer {
+  font-size: 15px;
+  margin-bottom: 10px;
+  color: #ff4d6d;
+
+}
+
+.heart {
+  position: absolute;
+  font-size: 25px;
+  cursor: pointer;
+  color: #ff4d6d;
+  animation: fall 1.5s linear forwards;
+}
+
+@keyframes fall {
+  from { top: -40px; }
+  to { top: 300px; opacity: 0; }
+}
+
+button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 20px;
+  background: #ff4d6d;
+  color: white;
+  font-size: 16px;
+}

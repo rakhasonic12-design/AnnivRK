@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="letter.css" />
+  <title>2nd Year Anniv</title>
+  <style>
+   
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+  <nav class="nav">
+    <a href="index.html"><i class="fi fi-bs-home"></i></a>
+    <a href="gallery.html"><i class="fi fi-bs-picture"></i></a>
+    <a href="letter.html" class="active"><i class="fi fi-bs-envelope"></i></a>
+    <a href="game.html"><i class="fi fi-bs-heart"></i></a>
+  </nav>
+  </nav>
+</header>
+
+
+    <div id="hearts-container"></div>
+
+    <div class="card-hearts" onclick="this.classList.toggle('open')">
+        <div class="card-inner">
+            <div class="card-front">
+              <h1 class="card-title">Dear Key</h1>
+              <P><span class="first">S</span>ayang Happy Anniversary kita yang ke-2 tahun ya!!! Semoga dengan ini kedepannya kita bisa jadi
+                lebih kuat lagi, lebih saling menyayangi lagi. Thankyou for all the things we've been through together,
+                buat semua yang udah kita usahain bareng-bareng walaupun sering ada kesusahan di tengah-tengahnya.
+                Thankyou for always making me feel special and loved, you are the most precious thing i have right now.
+                Happy anniversary ya cantik, ILYSM!
+              </P>
+            </div>
+            <div class="card-back">
+                <div>--The Date❤️--</div>
+                <div class="signature">November 15, 2023</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * window.innerWidth + 'px';
+            heart.style.fontSize = (10 + Math.random() * 20) + 'px';
+            heart.style.animationDuration = (2 + Math.random() * 3) + 's';
+            document.getElementById('hearts-container').appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 5000);
+        }
+
+        setInterval(createHeart, 300);
+    </script>
+</html>
+
+
+

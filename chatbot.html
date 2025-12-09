@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <title>Gemini Chatbot</title>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="active"><i class="fi fi-bs-home"></i></a>
+    <a href="gallery.html"><i class="fi fi-bs-picture"></i></a>
+    <a href="chatbot.html"><i class="fi fi-bs-envelope"></i></a>
+    <a href="#"><i class="fi fi-bs-heart"></i></a>
+  </nav>
+</header>
+
+<div class="chat-container">
+  <div id="chat-box" class="chat-box">
+    <h2 class="title-bot">Chatbot Gemini</h2>
+
+    <div id="messages"></div>
+
+    <div id="input-area">
+      <input id="user-input" type="text" placeholder="Tulis pesan...">
+      <input type="file" id="image-input" accept="image/*" hidden>
+      <button id="upload-btn">📷</button>
+      <button id="send-btn">Kirim</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const messagesDiv = document.getElementById("messages");
+  const input = document.getElementById("user-input");
+  const sendBtn = document.getElementById("send-btn");
+
+  let lastUploadedImage = null;
+
+  function scrollBottom() {
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  function addTextMessage(text, sender) {
+    const el = document.createElement("div");
+    el.className = `msg ${sender}`;
+    el.innerText = text;
+    messagesDiv.appendChild(el);
+    scrollBottom();
+  }
+
+  function addImageMessage(base64, sender) {
+    const wrap = document.createElement("div");
+    wrap.className = `msg ${sender}`;
+
+    const img = document.createElement("img");
+    img.src = base64;
+    img.className = "uploaded-img";
+
+    wrap.appendChild(img);
+    messagesDiv.appendChild(wrap);
+    scrollBottom();
+  }
+
+  function showLoading(text) {
+    const loading = document.createElement("div");
+    loading.className = "msg bot";
+    loading.innerText = text;
+    messagesDiv.appendChild(loading);
+    scrollBottom();
+    return loading;
+  }
+
+  // ======================================================
+  // ================ SEND MESSAGE ========================
+  // ======================================================
+  async function sendMessage() {
+    const userText = input.value.trim();
+    if (!userText) return;
+
+    addTextMessage(userText, "user");
+    input.value = "";
+
+    // Jika ingin mengubah style gambar
+    if (lastUploadedImage && /(komik|ubah|jadi|anime|kartun|sketsa|pixar|oil|cat minyak)/i.test(userText)) {
+      return transformImage(lastUploadedImage, userText);
+    }
+
+    const loading = showLoading("Gemini sedang mengetik...");
+
+    try {
+      const res = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyB_Ey6cCN3BVgIRDB2zM0YLQUANMhve2gs",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: userText }] }]
+          })
+        }
+      );
+
+      const data = await res.json();
+      loading.remove();
+
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Terjadi kesalahan.";
+      addTextMessage(reply, "bot");
+
+    } catch (err) {
+      loading.remove();
+      addTextMessage("Error koneksi ke server.", "bot");
+    }
+  }
+
+  sendBtn.addEventListener("click", sendMessage);
+  input.addEventListener("keypress", e => e.key === "Enter" && sendMessage());
+
+
+  // ======================================================
+  // ================ IMAGE UPLOAD ========================
+  // ======================================================
+  const imageInput = document.getElementById("image-input");
+  const uploadBtn = document.getElementById("upload-btn");
+
+  uploadBtn.addEventListener("click", () => imageInput.click());
+
+  imageInput.addEventListener("change", () => {
+    const file = imageInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      const base64 = e.target.result;
+      lastUploadedImage = base64;
+
+      addImageMessage(base64, "user");
+      analyzeImage(base64);
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+
+  // ======================================================
+  // ================ ANALYZE IMAGE =======================
+  // ======================================================
+  async function analyzeImage(base64) {
+    const loading = showLoading("Menganalisis gambar...");
+
+    try {
+      const res = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyB_Ey6cCN3BVgIRDB2zM0YLQUANMhve2gs",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  { text: "Jelaskan isi gambar ini dengan detail." },
+                  {
+                    inline_data: {
+                      mime_type: "image/jpeg",
+                      data: base64.split(",")[1]
+                    }
+                  }
+                ]
+              }
+            ]
+          })
+        }
+      );
+
+      const data = await res.json();
+      loading.remove();
+
+      const reply =
+        data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "Tidak bisa membaca gambar.";
+      addTextMessage(reply, "bot");
+
+    } catch (err) {
+      loading.remove();
+      addTextMessage("Gagal memproses gambar.", "bot");
+    }
+  }
+
+
+  // ======================================================
+  // ================ TRANSFORM IMAGE =====================
+  // ======================================================
+  async function transformImage(base64, styleText) {
+    const loading = showLoading("Mengubah gambar...");
+
+    try {
+      const res = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/imagemaker-3.0:generateContent?key=AIzaSyB_Ey6cCN3BVgIRDB2zM0YLQUANMhve2gs",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  { text: styleText },
+                  {
+                    inline_data: {
+                      mime_type: "image/jpeg",
+                      data: base64.split(",")[1]
+                    }
+                  }
+                ]
+              }
+            ]
+          })
+        }
+      );
+
+      const json = await res.json();
+      loading.remove();
+
+      const imgData =
+        json?.candidates?.[0]?.content?.parts?.[0]?.inline_data?.data;
+
+      if (!imgData) {
+        addTextMessage("Gagal membuat gambar baru.", "bot");
+        return;
+      }
+
+      addImageMessage(`data:image/png;base64,${imgData}`, "bot");
+
+    } catch (err) {
+      loading.remove();
+      addTextMessage("Transformasi gagal.", "bot");
+    }
+  }
+</script>
+
+</body>
+</html>
